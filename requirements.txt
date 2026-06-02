@@ -1,0 +1,5 @@
+flask
+openai
+line-bot-sdk
+requests
+gunicorn
