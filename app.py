@@ -17,10 +17,10 @@ from linebot.models import (
 # 1. 填入你的API金鑰
 # =========================
 
-LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
-LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-CWA_API_KEY = os.getenv("CWA_API_KEY")
+LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "").strip()
+LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET", "").strip()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
+CWA_API_KEY = os.getenv("CWA_API_KEY", "").strip()
 
 # =========================
 # 2. 初始化
@@ -180,9 +180,6 @@ def normalize_location_name(name):
 def get_weather_forecast(location_name):
     """
     使用中央氣象署 F-C0032-001：一般天氣預報-今明36小時天氣預報
-    1. 不指定 locationName，先抓全部縣市
-    2. 再用程式自己比對縣市名稱
-    這樣可以避免台/臺、縣市名稱不完整導致查不到
     """
 
     url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-C0032-001"
@@ -192,10 +189,28 @@ def get_weather_forecast(location_name):
     }
 
     try:
+        print("=== CWA DEBUG START ===")
+        print("Input location:", location_name)
+        print("CWA_API_KEY exists:", bool(CWA_API_KEY))
+        print("CWA_API_KEY length:", len(CWA_API_KEY) if CWA_API_KEY else 0)
+
         response = requests.get(url, params=params, timeout=10)
+
+        print("CWA status code:", response.status_code)
+        print("CWA response first 500:", response.text[:500])
+
         data = response.json()
 
+        if "records" not in data:
+            print("CWA response has no records.")
+            return None
+
+        if "location" not in data["records"]:
+            print("CWA records has no location.")
+            return None
+
         target_name = normalize_location_name(location_name)
+        print("Target name:", target_name)
 
         locations = data["records"]["location"]
 
@@ -233,10 +248,14 @@ def get_weather_forecast(location_name):
 
                 result += f"{start_time} ~ {end_time}：{parameter}\n"
 
+        print("=== CWA DEBUG SUCCESS ===")
         return result
 
     except Exception as e:
+        print("=== CWA DEBUG ERROR ===")
         print("CWA API error:", e)
+        print("CWA_API_KEY exists:", bool(CWA_API_KEY))
+        print("CWA_API_KEY length:", len(CWA_API_KEY) if CWA_API_KEY else 0)
         return None
 
 
