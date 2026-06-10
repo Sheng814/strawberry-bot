@@ -1,4 +1,5 @@
 import os
+import certifi
 from flask import Flask, request, abort
 from openai import OpenAI
 import requests
@@ -194,7 +195,12 @@ def get_weather_forecast(location_name):
         print("CWA_API_KEY exists:", bool(CWA_API_KEY))
         print("CWA_API_KEY length:", len(CWA_API_KEY) if CWA_API_KEY else 0)
 
-        response = requests.get(url, params=params, timeout=10)
+        response = requests.get(
+            url,
+            params=params,
+            timeout=10,
+            verify=certifi.where()
+        )
 
         print("CWA status code:", response.status_code)
         print("CWA response first 500:", response.text[:500])
