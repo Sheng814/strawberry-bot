@@ -1,3 +1,5 @@
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 import os
 import certifi
 from flask import Flask, request, abort
@@ -199,7 +201,7 @@ def get_weather_forecast(location_name):
             url,
             params=params,
             timeout=10,
-            verify=certifi.where()
+            verify=False
         )
 
         print("CWA status code:", response.status_code)
