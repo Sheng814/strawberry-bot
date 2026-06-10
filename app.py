@@ -1,11 +1,12 @@
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 import os
 import certifi
 from flask import Flask, request, abort
 from openai import OpenAI
 import requests
 import base64
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
